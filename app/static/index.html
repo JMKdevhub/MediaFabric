@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f3ede3"><title>DistriStream</title>
+<script>document.documentElement.dataset.theme='pista';localStorage.setItem('dvl-theme','pista');</script>
+<link rel="stylesheet" href="/static/css/app.css?v=distristream-ui-20261126-1">
+<link rel="stylesheet" id="lightThemeStyles" href="/static/css/apricot.css?v=47">
+<script>const pistaStyles=document.getElementById('lightThemeStyles');pistaStyles.disabled=false;new MutationObserver(()=>{if(document.documentElement.dataset.theme!=='pista')document.documentElement.dataset.theme='pista';pistaStyles.disabled=false}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});</script>
+<script>document.addEventListener('DOMContentLoaded',()=>{const nav=document.getElementById('navigation');const wire=()=>nav.querySelectorAll('.nav-heading').forEach(h=>{h.tabIndex=0;h.setAttribute('role','button')});new MutationObserver(wire).observe(nav,{childList:true,subtree:true});nav.addEventListener('click',e=>{const h=e.target.closest('.nav-heading');if(h)h.parentElement.toggleAttribute('data-open');else if(e.target.closest('.nav-link'))nav.querySelectorAll('.nav-group').forEach(g=>g.removeAttribute('data-open'))});nav.addEventListener('keydown',e=>{if(e.target.matches('.nav-heading')&&(e.key==='Enter'||e.key===' ')){e.preventDefault();e.target.click()}});wire()});</script>
+<script>document.addEventListener('DOMContentLoaded',()=>{const nav=document.getElementById('navigation');document.addEventListener('click',e=>{if(!nav.contains(e.target))nav.querySelectorAll('.nav-group').forEach(g=>g.removeAttribute('data-open'));else{const h=e.target.closest('.nav-heading');if(h)nav.querySelectorAll('.nav-group').forEach(g=>{if(g!==h.parentElement)g.removeAttribute('data-open')})}});document.addEventListener('keydown',e=>{if(e.key==='Escape')nav.querySelectorAll('.nav-group').forEach(g=>g.removeAttribute('data-open'))})});</script>
+<script>document.addEventListener('DOMContentLoaded',()=>{const nav=document.getElementById('navigation');const sync=()=>nav.querySelectorAll('.nav-heading').forEach(h=>h.setAttribute('aria-expanded',String(h.parentElement.hasAttribute('data-open'))));new MutationObserver(sync).observe(nav,{attributes:true,subtree:true,attributeFilter:['data-open']});sync()});</script>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="brand" href="#dashboard"><span class="brand-copy"><b><span class="brand-media">Media</span><span class="brand-fabric">Fabric</span></b><small>DISTRIBUTED VIDEO</small></span></a>
+    <nav id="navigation"></nav>
+    <div class="side-status"><div class="eyebrow">CLUSTER STATUS</div><div class="side-line"><span class="dot green"></span> Coordinator <b id="coordinatorStatus">ONLINE</b></div><div class="side-line"><span class="dot green"></span> Workers <b id="sideWorkers">—</b></div><div class="side-foot"><span class="pulse"></span> API connection <span id="apiStatus">connecting</span></div></div>
+    <div class="profile"><div class="avatar">DV</div><div><b>Video Lab</b><small>Research workspace</small></div><span class="more">···</span></div>
+  </aside>
+  <main class="main"><header class="topbar"><div class="crumb"><button class="icon-button menu-toggle" id="menuToggle" type="button" aria-label="Collapse menu" aria-expanded="true" title="Collapse menu">☰</button><strong id="crumbTitle">Dashboard</strong></div><div class="top-actions"><button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to dark mode"><span class="theme-icon">☼</span><span class="theme-name">Coffee light</span></button><span class="live-label"><i class="pulse"></i> LIVE</span><span id="lastUpdated">—</span><button class="icon-button" id="refreshButton" title="Refresh">↻</button><button class="user-button">DV</button></div></header><div id="view" class="content"></div></main>
+</div>
+<div id="drawerRoot"></div>
+<script>
+(() => {
+  const shell = document.querySelector('.shell');
+  const toggle = document.getElementById('menuToggle');
+  shell.classList.remove('menu-collapsed');
+  const sync = () => {
+    const expanded = !shell.classList.contains('menu-collapsed');
+    toggle.setAttribute('aria-expanded', String(expanded));
+    toggle.setAttribute('aria-label', expanded ? 'Collapse menu' : 'Expand menu');
+    toggle.title = expanded ? 'Collapse menu' : 'Expand menu';
+  };
+  toggle.addEventListener('click', () => {
+    shell.classList.toggle('menu-collapsed');
+    sync();
+  });
+  sync();
+})();
+</script>
+<script type="module" src="/static/js/app.js?v=distristream-ui-20261126-5"></script>
+<script>
+(() => {
+  const commandLine = /^(?:[>$#]\s*)?(?:python(?:3(?:\.\d+)?)?|py(?:\s|$)|pip(?:3)?(?:\s|$)|ffmpeg(?:\s|$)|git(?:\s|$)|cd(?:\s|$)|npm(?:\s|$)|npx(?:\s|$)|uv(?:\s|$)|conda(?:\s|$)|docker(?:\s|$)|curl(?:\s|$)|wget(?:\s|$)|sudo(?:\s|$)|winget(?:\s|$)|choco(?:\s|$)|apt(?:-get)?(?:\s|$)|\.\\|&\s|setx\s|\$env:|export\s)/i;
+  const heading = line => /^(?:#+\s*)?(requirements?|prerequisites?|apps(?:\s+and\s+versions)?|commands?|installation\s+commands?)\s*:??$/i.test(line);
+  function renderInstructions(root) {
+    if (!root || root.dataset.bulleted === 'true' || root.dataset.referenceFormat === 'true') return;
+    const lines = root.textContent.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+    if (!lines.length) return;
+    const requirements = [], commands = [];
+    let section = '';
+    for (const original of lines) {
+      const line = original.replace(/^(?:[-*•]|\d+[.)])\s*/, '').trim();
+      if (!line) continue;
+      const isReq = /^(?:#+\s*)?(?:requirements?|prerequisites?|apps(?:\s+and\s+versions)?)\s*:??$/i.test(line);
+      const isCmd = /^(?:#+\s*)?(?:commands?|installation\s+commands?)\s*:??$/i.test(line);
+      if (isReq) { section = 'requirements'; continue; }
+      if (isCmd) { section = 'commands'; continue; }
+      if (section === 'requirements') requirements.push(line);
+      else if (section === 'commands' || commandLine.test(line)) commands.push(line);
+      else if (/\b(?:version|python|ffmpeg|windows|linux|macos|requirements)\b/i.test(line)) requirements.push(line);
+      else (commands.length ? commands : requirements).push(line);
+    }
+    if (!requirements.length && commands.length) requirements.push('See the commands below for the required applications and setup.');
+    const replacement = document.createElement('div');
+    replacement.id = root.id;
+    replacement.className = root.className;
+    replacement.dataset.bulleted = 'true';
+    for (const [title, items] of [['Requirements', requirements], ['Commands', commands]]) {
+      const sectionNode = document.createElement('section');
+      sectionNode.className = 'worker-instruction-section';
+      const headingNode = document.createElement('h4');
+      headingNode.className = 'worker-instruction-heading';
+      headingNode.textContent = title;
+      sectionNode.appendChild(headingNode);
+      const list = document.createElement('ul');
+      for (const item of items) {
+        const li = document.createElement('li');
+        li.textContent = item;
+        list.appendChild(li);
+      }
+      if (!items.length) {
+        const li = document.createElement('li');
+        li.textContent = 'No commands provided.';
+        list.appendChild(li);
+      }
+      sectionNode.appendChild(list);
+      replacement.appendChild(sectionNode);
+    }
+    root.replaceWith(replacement);
+  }
+  const view = document.getElementById('view');
+  new MutationObserver(() => renderInstructions(document.getElementById('workerInstructions')))
+    .observe(view, { childList: true, subtree: true });
+  renderInstructions(document.getElementById('workerInstructions'));
+})();
+</script>
+<script>
+(() => {
+  function applyReferenceFormat(root) {
+    if (!root || root.dataset.referenceFormat === 'true') return;
+    const source = root.textContent || '';
+    const coordinator = (source.match(/https?:\/\/[^\s)<>]+/) || [])[0] || 'http://10.83.149.238:8000';
+    const names = [...source.matchAll(/--name\s+([A-Za-z0-9_-]+)/g)].map(m => m[1]);
+    const workers = [...new Set(names.length ? names : ['Worker-1'])];
+    const requirements = [
+      'Python 3.11+',
+      'FFmpeg 9.1',
+      'FFprobe 9.1',
+      'requests 2.32.3',
+      'psutil 6.1.1'
+    ];
+    const commands = [
+      'py -m venv worker\\.venv',
+      '.\\worker\\.venv\\Scripts\\python.exe -m pip install -r worker\\requirements.txt',
+      ...workers.map(name => `${name}: .\\worker\\.venv\\Scripts\\python.exe worker\\worker.py --coordinator ${coordinator} --name ${name}`),
+      'PowerShell (Administrator, on coordinator): New-NetFirewallRule -DisplayName "DistriStream Coordinator" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 8000 -Profile Private',
+      'Use the coordinator LAN IP; 127.0.0.1 works only on the coordinator.'
+    ];
+    const replacement = document.createElement('div');
+    replacement.id = root.id;
+    replacement.className = root.className;
+    replacement.dataset.referenceFormat = 'true';
+    for (const [title, items] of [['Requirements', requirements], ['Commands', commands]]) {
+      const section = document.createElement('section');
+      section.className = 'worker-instruction-section';
+      const heading = document.createElement('h3');
+      heading.className = 'worker-instruction-heading';
+      heading.textContent = title;
+      const list = document.createElement('ul');
+      items.forEach(item => { const li = document.createElement('li'); li.textContent = item; list.appendChild(li); });
+      section.append(heading, list);
+      replacement.appendChild(section);
+    }
+    root.replaceWith(replacement);
+  }
+  const view = document.getElementById('view');
+  new MutationObserver(() => applyReferenceFormat(document.getElementById('workerInstructions')))
+    .observe(view, { childList: true, subtree: true });
+  applyReferenceFormat(document.getElementById('workerInstructions'));
+})();
+</script>
+<script>
+(() => {
+  const markWorkers = () => document.querySelectorAll('.worker-grid .worker-card').forEach(card => {
+    const text = `${card.className} ${card.querySelector('.status')?.textContent || ''} ${card.querySelector('.badge')?.textContent || ''} ${card.querySelector('.worker-caption')?.textContent || ''}`.toLowerCase();
+    card.dataset.workerState = /completed|terminated|cancelled|stopped/.test(text) ? 'done' : /busy|processing|working|transcoding/.test(text) ? 'busy' : 'idle';
+  });
+  const view = document.getElementById('view');
+  new MutationObserver(markWorkers).observe(view, { childList: true, subtree: true, characterData: true });
+  markWorkers();
+})();
+</script>
+<script>
+(() => {
+  const updateTrees = () => document.querySelectorAll('.worker-grid').forEach(grid => {
+    let root = grid.querySelector(':scope > .coordinator-node');
+    if (!root) {
+      root = document.createElement('section');
+      root.className = 'coordinator-node';
+      const title = document.createElement('h3');
+      title.className = 'coordinator-title';
+      title.textContent = 'Coordinator';
+      root.append(title);
+      grid.prepend(root);
+    }
+    root.querySelector('.coordinator-specs')?.remove();
+  });
+  const view = document.getElementById('view');
+  new MutationObserver(updateTrees).observe(view, { childList: true, subtree: true, characterData: true });
+  updateTrees();
+})();
+</script>
+<script>
+(() => {
+  const stateColor = { busy: '#3f7545', idle: '#b74c4c', done: '#89928a' };
+  const pending = new WeakMap();
+  function drawTree(grid) {
+    const root = grid.querySelector(':scope > .coordinator-node');
+    const workers = [...grid.querySelectorAll(':scope > .worker-card')];
+    if (!root) return;
+    let svg = grid.querySelector(':scope > .tree-connectors');
+    if (!svg) {
+      svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.classList.add('tree-connectors');
+      svg.setAttribute('aria-hidden', 'true');
+      grid.prepend(svg);
+    }
+    const gridRect = grid.getBoundingClientRect();
+    const width = Math.max(grid.scrollWidth, gridRect.width);
+    const height = Math.max(grid.scrollHeight, gridRect.height);
+    svg.setAttribute('width', width);
+    svg.setAttribute('height', height);
+    svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+    const rootRect = root.getBoundingClientRect();
+    const rx = rootRect.left - gridRect.left + grid.scrollLeft + rootRect.width / 2;
+    const ry = rootRect.bottom - gridRect.top + grid.scrollTop;
+    const points = workers.map(card => {
+      const rect = card.getBoundingClientRect();
+      return { x: rect.left - gridRect.left + grid.scrollLeft + rect.width / 2,
+        y: rect.top - gridRect.top + grid.scrollTop,
+        state: card.dataset.workerState || 'idle' };
+    });
+    const paths = [];
+    points.forEach((p, index) => {
+      const spread = points.length < 2 ? 0 : (index / (points.length - 1) - .5) * Math.min(rootRect.width * .72, points.length * 54);
+      const startX = rx + spread;
+      const distance = Math.max(30, p.y - ry);
+      paths.push({
+        d: `M ${startX} ${ry} C ${startX} ${ry + distance * .42}, ${p.x} ${p.y - distance * .35}, ${p.x} ${p.y}`,
+        color: stateColor[p.state] || stateColor.idle, width: 3, dash: p.state === 'done' ? '4 5' : ''
+      });
+    });
+    while (svg.children.length < paths.length) svg.appendChild(document.createElementNS('http://www.w3.org/2000/svg', 'path'));
+    while (svg.children.length > paths.length) svg.lastElementChild.remove();
+    paths.forEach((path, i) => {
+      const node = svg.children[i];
+      node.setAttribute('d', path.d);
+      node.setAttribute('fill', 'none');
+      node.setAttribute('stroke', path.color);
+      node.setAttribute('stroke-width', path.width);
+      node.setAttribute('stroke-linecap', 'round');
+      node.setAttribute('stroke-linejoin', 'round');
+      node.setAttribute('stroke-dasharray', path.dash || '');
+      node.removeAttribute('filter');
+    });
+  }
+  function schedule(grid) {
+    if (pending.has(grid)) return;
+    const id = requestAnimationFrame(() => { pending.delete(grid); drawTree(grid); });
+    pending.set(grid, id);
+  }
+  function refresh() {
+    document.querySelectorAll('.worker-grid').forEach(grid => {
+      schedule(grid);
+      if (!grid.dataset.treeResizeObserved && 'ResizeObserver' in window) {
+        grid.dataset.treeResizeObserved = 'true';
+        const resize = new ResizeObserver(() => schedule(grid));
+        resize.observe(grid);
+        grid.querySelectorAll('.coordinator-node,.worker-card').forEach(node => resize.observe(node));
+        grid.addEventListener('scroll', () => schedule(grid), { passive: true });
+      }
+    });
+  }
+  const view = document.getElementById('view');
+  new MutationObserver(refresh).observe(view, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-worker-state'] });
+  window.addEventListener('resize', refresh);
+  refresh();
+})();
+</script>
+</body></html>

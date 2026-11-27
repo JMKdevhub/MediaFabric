@@ -52,6 +52,13 @@ parser.add_argument(
     "--name"
 )
 
+parser.add_argument(
+    "--coordinator-path",
+    choices=("direct", "wireguard"),
+    default="direct",
+    help="Network path used for actual worker traffic.",
+)
+
 args = parser.parse_args()
 
 
@@ -60,6 +67,7 @@ args = parser.parse_args()
 # ============================================================
 
 BASE = args.coordinator.rstrip("/")
+COORDINATOR_PATH = args.coordinator_path
 
 NAME = (
     args.name
@@ -232,6 +240,7 @@ def heartbeat(
                 "queue_depth": 1 if active else 0,
                 "network_cost": 0,
                 "gpu": detect_gpu(),
+                "network_path": COORDINATOR_PATH,
             }
         )
         response.raise_for_status()
@@ -283,6 +292,7 @@ post(
         "queue_depth": 0,
         "max_queue": 5,
         "network_cost": 0,
+        "network_path": COORDINATOR_PATH,
     }
 ).raise_for_status()
 
@@ -290,7 +300,6 @@ post(
 print(
     f"{NAME} registered -> {BASE}"
 )
-
 
 # ============================================================
 # VIDEO PROFILES

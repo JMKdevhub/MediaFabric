@@ -4,8 +4,8 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#f3ede3"><title>mediaFabric</title>
 <script>document.documentElement.dataset.theme='pista';localStorage.setItem('dvl-theme','pista');</script>
-<link rel="stylesheet" href="/static/css/app.css?v=mediafabric-ui-20261127-2">
-<link rel="stylesheet" id="lightThemeStyles" href="/static/css/apricot.css?v=54">
+<link rel="stylesheet" href="/static/css/app.css?v=mediafabric-ui-20261127-7">
+<link rel="stylesheet" id="lightThemeStyles" href="/static/css/apricot.css?v=58">
 <script>const pistaStyles=document.getElementById('lightThemeStyles');pistaStyles.disabled=false;new MutationObserver(()=>{if(document.documentElement.dataset.theme!=='pista')document.documentElement.dataset.theme='pista';pistaStyles.disabled=false}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});</script>
 <script>document.addEventListener('DOMContentLoaded',()=>{const nav=document.getElementById('navigation');const wire=()=>nav.querySelectorAll('.nav-heading').forEach(h=>{h.tabIndex=0;h.setAttribute('role','button')});new MutationObserver(wire).observe(nav,{childList:true,subtree:true});nav.addEventListener('click',e=>{const h=e.target.closest('.nav-heading');if(h)h.parentElement.toggleAttribute('data-open');else if(e.target.closest('.nav-link'))nav.querySelectorAll('.nav-group').forEach(g=>g.removeAttribute('data-open'))});nav.addEventListener('keydown',e=>{if(e.target.matches('.nav-heading')&&(e.key==='Enter'||e.key===' ')){e.preventDefault();e.target.click()}});wire()});</script>
 <script>document.addEventListener('DOMContentLoaded',()=>{const nav=document.getElementById('navigation');document.addEventListener('click',e=>{if(!nav.contains(e.target))nav.querySelectorAll('.nav-group').forEach(g=>g.removeAttribute('data-open'));else{const h=e.target.closest('.nav-heading');if(h)nav.querySelectorAll('.nav-group').forEach(g=>{if(g!==h.parentElement)g.removeAttribute('data-open')})}});document.addEventListener('keydown',e=>{if(e.key==='Escape')nav.querySelectorAll('.nav-group').forEach(g=>g.removeAttribute('data-open'))})});</script>
@@ -41,7 +41,7 @@
   sync();
 })();
 </script>
-<script type="module" src="/static/js/app.js?v=mediafabric-ui-20261127-3"></script>
+<script type="module" src="/static/js/app.js?v=mediafabric-ui-20261127-10"></script>
 <script>
 (() => {
   const commandLine = /^(?:[>$#]\s*)?(?:python(?:3(?:\.\d+)?)?|py(?:\s|$)|pip(?:3)?(?:\s|$)|ffmpeg(?:\s|$)|git(?:\s|$)|cd(?:\s|$)|npm(?:\s|$)|npx(?:\s|$)|uv(?:\s|$)|conda(?:\s|$)|docker(?:\s|$)|curl(?:\s|$)|wget(?:\s|$)|sudo(?:\s|$)|winget(?:\s|$)|choco(?:\s|$)|apt(?:-get)?(?:\s|$)|\.\\|&\s|setx\s|\$env:|export\s)/i;
@@ -102,23 +102,28 @@
 (() => {
   function applyReferenceFormat(root) {
     if (!root || root.dataset.referenceFormat === 'true') return;
-    const source = root.textContent || '';
-    const coordinator = (source.match(/https?:\/\/[^\s)<>]+/) || [])[0] || 'http://10.83.149.238:8000';
-    const names = [...source.matchAll(/--name\s+([A-Za-z0-9_-]+)/g)].map(m => m[1]);
+    const source = root.innerText || root.textContent || '';
+    const argument = name => (source.match(new RegExp(`${name}\\s+(https?:\\/\\/[^\\s)<>]+)`)) || [])[1] || '';
+    const coordinator = argument('--coordinator');
+    if (!coordinator) return;
+    const path = (source.match(/--coordinator-path\s+(direct|wireguard)/) || [])[1] || 'direct';
+    const names = [...source.matchAll(/--name[ \t]+(Worker-\d+)/g)].map(m => m[1]);
     const workers = [...new Set(names.length ? names : ['Worker-1'])];
     const requirements = [
       'Python 3.11+',
       'FFmpeg 9.1',
       'FFprobe 9.1',
       'requests 2.32.3',
-      'psutil 6.1.1'
+      'psutil 6.1.1',
+      ...(path === 'wireguard' ? ['WireGuard installed and connected on the coordinator and workers'] : [])
     ];
+    const workerOptions = `--coordinator ${coordinator} --coordinator-path ${path}`;
     const commands = [
       'py -m venv worker\\.venv',
       '.\\worker\\.venv\\Scripts\\python.exe -m pip install -r worker\\requirements.txt',
-      ...workers.map(name => `${name}: .\\worker\\.venv\\Scripts\\python.exe worker\\worker.py --coordinator ${coordinator} --name ${name}`),
-      'PowerShell (Administrator, on coordinator): New-NetFirewallRule -DisplayName "mediaFabric Coordinator" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 8000 -Profile Private',
-      'Use the coordinator LAN IP; 127.0.0.1 works only on the coordinator.'
+      ...workers.map(name => `${name}: .\\worker\\.venv\\Scripts\\python.exe worker\\worker.py ${workerOptions} --name ${name}`),
+      'Allow coordinator TCP port 8000 only from authorized LAN or WireGuard peers; do not expose it to the public internet.',
+      ...(path === 'wireguard' ? ['Connect WireGuard on both devices before starting the worker. Use the coordinator VPN address here; its public endpoint belongs in the WireGuard tunnel configuration.'] : [])
     ];
     const replacement = document.createElement('div');
     replacement.id = root.id;

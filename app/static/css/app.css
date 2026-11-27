@@ -233,7 +233,7 @@ input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{ou
 .new-job-layout .mode-option b{align-self:end;font-size:13px}
 .new-job-layout .mode-option p{align-self:start;margin-top:8px;font-size:11px}
 @media(max-width:520px){.complexity-counts{grid-template-columns:1fr}}
-@media(max-width:520px){.setup-fields .field:nth-child(3),.setup-fields #generateInstructions{grid-column:1/-1}}
+@media(max-width:520px){.setup-fields .field:nth-child(3),.setup-fields .field:nth-child(4),.setup-fields #generateInstructions{grid-column:1/-1}}
 .complexity-distribution{margin-top:20px}
 .complexity-summary{display:flex;align-items:center;gap:38px;min-height:270px;padding:22px 26px}
 .complexity-pie{flex:0 0 220px;width:220px;height:220px;border-radius:50%;border:1px solid color-mix(in srgb,var(--text) 18%,transparent);box-shadow:0 8px 22px #0002}
@@ -248,3 +248,12 @@ input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{ou
 
 .menu-toggle{flex:0 0 30px;font-size:14px}.sidebar,.main{transition:transform .24s ease,margin-left .24s ease}.shell.menu-collapsed .sidebar{transform:translateX(-100%)}.shell.menu-collapsed .main{margin-left:0}
 @media(max-width:760px){.shell.menu-collapsed .sidebar{position:fixed;inset:0 auto 0 0;width:min(246px,85vw);height:100vh;max-height:none;padding:18px 14px 12px;display:flex;transform:translateX(-100%)}.shell.menu-collapsed .main{margin-left:0}}
+.field-help{margin:0;color:var(--muted);font-size:11px;line-height:1.5}
+.page-head .wireguard-security-badge{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:54px;padding:11px 20px;border:1px solid #e3bda5;border-radius:12px;background:linear-gradient(135deg,#fffdf7,#fff1e5);color:#594535;box-shadow:0 6px 20px #5a351c20,inset 0 1px 0 #fff;font:700 13px var(--sans);letter-spacing:.3px;white-space:nowrap}
+.wireguard-security-icon{width:25px;height:25px;display:grid;place-items:center;flex:0 0 25px;border-radius:8px;background:linear-gradient(145deg,#ec5350,#c91b29);color:#fff;font:700 14px var(--sans);box-shadow:0 2px 8px #d51f2b45}
+.wireguard-security-badge strong{margin-left:4px;color:#d51f2b;font:800 15px var(--mono);letter-spacing:.8px;text-shadow:0 0 6px #ed394c70,0 0 14px #ed394c45;animation:wireguard-red-shine 1.6s ease-in-out infinite alternate}
+.page-head .head-actions{flex-wrap:wrap}
+@keyframes wireguard-red-shine{from{text-shadow:0 0 4px #ed394c55,0 0 10px #ed394c30}to{text-shadow:0 0 8px #ed394ca0,0 0 19px #ed394c65}}
+@media(prefers-reduced-motion:reduce){.wireguard-security-badge strong{animation:none}}
+.page-head .worker-wireguard-badge{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:8px 13px;border:1px solid #e3bda5;border-radius:11px;background:linear-gradient(135deg,#fffdf7,#fff1e5);color:#794b35;box-shadow:0 4px 14px #5a351c18,inset 0 1px 0 #fff;font:700 10px var(--mono);letter-spacing:.7px;white-space:nowrap}
+.worker-wireguard-badge img{display:block;width:27px;height:27px;object-fit:contain}

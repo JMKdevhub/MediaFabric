@@ -39,6 +39,12 @@ Use the coordinator's current LAN IPv4 address if it differs; do not use `127.0.
 
 To check connectivity from a worker laptop, run `Test-NetConnection 192.168.0.107 -Port 8000` in PowerShell. `TcpTestSucceeded` should be `True`. The coordinator must be running with `--host 0.0.0.0` so other machines can reach it.
 
+## WireGuard worker route
+
+WireGuard is installed and configured on the coordinator and worker computers separately; MediaFabric does not create VPN keys or manage tunnels. In **New Job**, choose **Direct** to enter the coordinator's LAN address, or **Using WireGuard** to enter its VPN address. The generated worker command uses only the selected address and route. The public WireGuard endpoint (usually a public IP or hostname plus UDP port 51820) belongs in the worker's WireGuard tunnel configuration; worker app traffic should use the coordinator's private VPN address.
+
+Keep the direct route limited to the trusted LAN, allow the VPN route only for authorized WireGuard peers, and never expose TCP port 8000 to the public internet. Connect WireGuard on both computers before starting a worker with the WireGuard route.
+
 The left navigation includes **Task Distribution**, which displays live completed, queued, assigned, and failed task totals in a doughnut chart. The page shows the distribution chart without a task routing table.
 
 ## Deploy to Vercel
@@ -74,6 +80,7 @@ It can also be switched live with `POST /api/scheduler/mode`:
 
 Useful APIs include:
 
+- `GET /api/network/metrics`
 - `GET /api/jobs/{job_id}/analysis`
 - `GET /api/jobs/{job_id}/metrics`
 - `GET /api/scheduler/status`

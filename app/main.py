@@ -165,6 +165,7 @@ def init():
             candidates TEXT,
             created REAL
         );
+
         """
     )
 
@@ -203,6 +204,7 @@ def init():
             ("tasks_failed", "INTEGER DEFAULT 0"),
             ("tasks_recovered", "INTEGER DEFAULT 0"),
             ("disconnect_requested", "INTEGER DEFAULT 0"),
+            ("network_path", "TEXT"),
         ],
     }
 
@@ -280,6 +282,9 @@ async def register(
 ):
 
     data = await request.json()
+    network_path = data.get("network_path", "direct")
+    if network_path not in ("direct", "wireguard"):
+        raise HTTPException(status_code=400, detail="Network path must be direct or wireguard")
 
     worker_id = (
         data.get("id")
@@ -302,8 +307,8 @@ async def register(
         INSERT INTO workers
         (id, name, host, status, last_seen, active, cpu, gpu,
          ram, cpu_usage, gpu_usage, queue_depth, max_queue,
-         network_cost)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         network_cost, network_path)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 
         ON CONFLICT(id) DO UPDATE SET
             name=excluded.name,
@@ -314,7 +319,8 @@ async def register(
             cpu=excluded.cpu,
             gpu=excluded.gpu,
             ram=COALESCE(excluded.ram, workers.ram),
-            max_queue=COALESCE(excluded.max_queue, workers.max_queue)
+            max_queue=COALESCE(excluded.max_queue, workers.max_queue),
+            network_path=excluded.network_path
         """,
         (
             worker_id,
@@ -340,6 +346,7 @@ async def register(
             data.get("queue_depth", 0),
             data.get("max_queue", QUEUE_CAPACITY),
             data.get("network_cost", 0),
+            network_path,
         ),
     )
 
@@ -360,6 +367,9 @@ async def heartbeat(
     request: Request
 ):
     data = await request.json()
+    network_path = data.get("network_path", "direct")
+    if network_path not in ("direct", "wireguard"):
+        raise HTTPException(status_code=400, detail="Network path must be direct or wireguard")
     connection = db()
     worker = connection.execute(
         "SELECT disconnect_requested FROM workers WHERE id=?",
@@ -383,14 +393,14 @@ async def heartbeat(
         """
         UPDATE workers
         SET status=?, last_seen=?, active=?, cpu_usage=?, gpu_usage=?, ram=?,
-            queue_depth=?, network_cost=?, gpu=COALESCE(?, gpu)
+            queue_depth=?, network_cost=?, gpu=COALESCE(?, gpu), network_path=?
         WHERE id=?
         """,
         (
             data.get("status", "idle"), time.time(), data.get("active"),
             data.get("cpu_usage", 0), data.get("gpu_usage", 0), data.get("ram"),
             data.get("queue_depth", 0), data.get("network_cost", 0),
-            data.get("gpu"), wid,
+            data.get("gpu"), network_path, wid,
         ),
     )
     connection.commit()

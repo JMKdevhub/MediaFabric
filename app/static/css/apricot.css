@@ -395,9 +395,10 @@ h1,h2,h3,.nav-heading,.nav-link,.page-head .section-kicker,.card-head h2,.brand 
 .worker-card:hover,.worker-card:focus-within{z-index:4}
 @media(max-width:700px){.worker-grid{grid-template-columns:minmax(0,1fr);gap:44px 0;padding-inline:12px}.worker-grid:after{background:linear-gradient(#547737,#547737) 50% 80px/3px 30px no-repeat,linear-gradient(90deg,#547737,#547737) 50% 109px/0 0 no-repeat}.worker-grid:has(.worker-card[data-worker-state="busy"]):after{background:linear-gradient(#3f7545,#3f7545) 50% 80px/3px 30px no-repeat,linear-gradient(90deg,#3f7545,#3f7545) 50% 109px/0 0 no-repeat}}
 /* Deep sage finish with white panels and the gold wordmark retained. */
-:root{--bg:#d0d9c8;--side:#fff;--panel:#fff;--panel2:#e6ecdf;--line:#c3cfb9;--text:#2f3d31;--muted:#687a69;--dim:#879487;--cyan:#405d43;--green:#405d43;--blue:#405d43}
+:root{--bg:#d0d9c8;--side:#f3f1e7;--panel:#f8f6ed;--panel2:#e6ecdf;--line:#c3cfb9;--text:#2f3d31;--muted:#687a69;--dim:#879487;--cyan:#405d43;--green:#405d43;--blue:#405d43}
 body,.main{background:#cbd5c2}
-.sidebar,.topbar,.side-status,.card,.worker-card{background:#fff}
+.sidebar,.topbar,.side-status{background:#f3f1e7}
+.card,.worker-card,.coordinator-node,.worker-instruction-section{background:#f8f6ed}
 .sidebar,.topbar,.side-status,.card,.worker-card{border-color:#c3cfb9}
 .nav-heading,.nav-link{color:#405640}
 .nav-link:hover,.nav-group[data-open] .nav-heading{background:#e0e8d8;color:#304b33}
@@ -425,3 +426,22 @@ h1,h2,h3,.nav-heading,.nav-link,.brand b,.crumb strong,.card-head h2,.page-head 
 .nav-group[data-open=""] .nav-link:nth-of-type(3){left:66.666vw;width:33.334vw}
 .nav-heading:focus-visible{outline:2px solid #8bb783;outline-offset:2px}
 @media(prefers-reduced-motion:reduce){.nav-link{transition:none!important}}
+.nav-group:nth-child(2) .nav-link,.nav-group:nth-child(3) .nav-link{background:#f8f6ed}
+.worker-card .worker-stats{background:#f8f6ed}
+:root{--bg:#d0d9c8;--side:#f8f6eb;--panel:#fcfaf2;--panel2:#e6ecdf}
+body,.main{background:#cbd5c2}
+.sidebar,.topbar,.side-status{background:#f8f6eb}
+.card,.worker-card,.coordinator-node,.worker-instruction-section{background:#fcfaf2}
+.detail-tile,.drop-zone,.formula,.notice,.decision,.mode-option,.profile-option,.quality-button,.candidate,.filter-row{background:#f7f5e9}
+.nav-group:nth-child(2) .nav-link,.nav-group:nth-child(3) .nav-link,.worker-card .worker-stats{background:#fcfaf2}
+.worker-grid:before{box-shadow:0 0 0 7px #fcfaf2,0 7px 18px #334a2814}
+.instruction-panel{background:#f6f4e8}
+.nav-heading:after{content:none}
+.nav-group:nth-child(2):hover:not([data-open]) .nav-link,.nav-group:nth-child(2):focus-within:not([data-open]) .nav-link,.nav-group:nth-child(3):hover:not([data-open]) .nav-link,.nav-group:nth-child(3):focus-within:not([data-open]) .nav-link{position:absolute;left:0;right:auto;width:236px;height:43px;padding:10px 14px;justify-content:flex-start;display:flex!important;opacity:1;pointer-events:auto;transform:translateY(0);background:var(--panel);color:var(--text);border:0;border-left:3px solid transparent;border-radius:0;box-shadow:none;z-index:14;text-align:left;font-size:13px}
+.nav-group:nth-child(2):hover:not([data-open]) .nav-link:first-of-type,.nav-group:nth-child(2):focus-within:not([data-open]) .nav-link:first-of-type,.nav-group:nth-child(3):hover:not([data-open]) .nav-link:first-of-type,.nav-group:nth-child(3):focus-within:not([data-open]) .nav-link:first-of-type{top:calc(100% + 5px)}
+.nav-group:nth-child(2):hover:not([data-open]) .nav-link:nth-of-type(2),.nav-group:nth-child(2):focus-within:not([data-open]) .nav-link:nth-of-type(2),.nav-group:nth-child(3):hover:not([data-open]) .nav-link:nth-of-type(2),.nav-group:nth-child(3):focus-within:not([data-open]) .nav-link:nth-of-type(2){top:calc(100% + 48px)}
+.nav-group:nth-child(2):hover:not([data-open]) .nav-link:nth-of-type(3),.nav-group:nth-child(2):focus-within:not([data-open]) .nav-link:nth-of-type(3),.nav-group:nth-child(3):hover:not([data-open]) .nav-link:nth-of-type(3),.nav-group:nth-child(3):focus-within:not([data-open]) .nav-link:nth-of-type(3){top:calc(100% + 91px)}
+.nav-group:nth-child(2):hover:not([data-open]) .nav-link:last-child,.nav-group:nth-child(2):focus-within:not([data-open]) .nav-link:last-child,.nav-group:nth-child(3):hover:not([data-open]) .nav-link:last-child,.nav-group:nth-child(3):focus-within:not([data-open]) .nav-link:last-child{border-radius:0 0 10px 10px;box-shadow:0 12px 24px #4533211a}
+.nav-group:nth-child(2):hover:not([data-open]) .nav-link:hover,.nav-group:nth-child(2):focus-within:not([data-open]) .nav-link:hover,.nav-group:nth-child(3):hover:not([data-open]) .nav-link:hover,.nav-group:nth-child(3):focus-within:not([data-open]) .nav-link:hover{background:color-mix(in srgb,var(--green) 12%,var(--panel));color:var(--text);border-left-color:var(--green)}
+.nav-group:nth-child(2):hover:not([data-open]) .nav-link.active,.nav-group:nth-child(2):focus-within:not([data-open]) .nav-link.active,.nav-group:nth-child(3):hover:not([data-open]) .nav-link.active,.nav-group:nth-child(3):focus-within:not([data-open]) .nav-link.active{background:color-mix(in srgb,var(--green) 20%,var(--panel));color:var(--text);border-left-color:var(--green);box-shadow:none}
+@media(max-width:620px){.nav-group:nth-child(2):hover:not([data-open]) .nav-link,.nav-group:nth-child(2):focus-within:not([data-open]) .nav-link,.nav-group:nth-child(3):hover:not([data-open]) .nav-link,.nav-group:nth-child(3):focus-within:not([data-open]) .nav-link{left:auto;right:0;width:205px;height:40px}.nav-group:nth-child(2):hover:not([data-open]) .nav-link:first-of-type,.nav-group:nth-child(2):focus-within:not([data-open]) .nav-link:first-of-type,.nav-group:nth-child(3):hover:not([data-open]) .nav-link:first-of-type,.nav-group:nth-child(3):focus-within:not([data-open]) .nav-link:first-of-type{top:100%}.nav-group:nth-child(2):hover:not([data-open]) .nav-link:nth-of-type(2),.nav-group:nth-child(2):focus-within:not([data-open]) .nav-link:nth-of-type(2),.nav-group:nth-child(3):hover:not([data-open]) .nav-link:nth-of-type(2),.nav-group:nth-child(3):focus-within:not([data-open]) .nav-link:nth-of-type(2){top:calc(100% + 40px)}.nav-group:nth-child(2):hover:not([data-open]) .nav-link:nth-of-type(3),.nav-group:nth-child(2):focus-within:not([data-open]) .nav-link:nth-of-type(3),.nav-group:nth-child(3):hover:not([data-open]) .nav-link:nth-of-type(3),.nav-group:nth-child(3):focus-within:not([data-open]) .nav-link:nth-of-type(3){top:calc(100% + 80px)}}

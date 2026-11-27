@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#f3ede3"><title>DistriStream</title>
+<meta name="theme-color" content="#f3ede3"><title>mediaFabric</title>
 <script>document.documentElement.dataset.theme='pista';localStorage.setItem('dvl-theme','pista');</script>
-<link rel="stylesheet" href="/static/css/app.css?v=distristream-ui-20261126-1">
-<link rel="stylesheet" id="lightThemeStyles" href="/static/css/apricot.css?v=47">
+<link rel="stylesheet" href="/static/css/app.css?v=mediafabric-ui-20261127-2">
+<link rel="stylesheet" id="lightThemeStyles" href="/static/css/apricot.css?v=54">
 <script>const pistaStyles=document.getElementById('lightThemeStyles');pistaStyles.disabled=false;new MutationObserver(()=>{if(document.documentElement.dataset.theme!=='pista')document.documentElement.dataset.theme='pista';pistaStyles.disabled=false}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});</script>
 <script>document.addEventListener('DOMContentLoaded',()=>{const nav=document.getElementById('navigation');const wire=()=>nav.querySelectorAll('.nav-heading').forEach(h=>{h.tabIndex=0;h.setAttribute('role','button')});new MutationObserver(wire).observe(nav,{childList:true,subtree:true});nav.addEventListener('click',e=>{const h=e.target.closest('.nav-heading');if(h)h.parentElement.toggleAttribute('data-open');else if(e.target.closest('.nav-link'))nav.querySelectorAll('.nav-group').forEach(g=>g.removeAttribute('data-open'))});nav.addEventListener('keydown',e=>{if(e.target.matches('.nav-heading')&&(e.key==='Enter'||e.key===' ')){e.preventDefault();e.target.click()}});wire()});</script>
 <script>document.addEventListener('DOMContentLoaded',()=>{const nav=document.getElementById('navigation');document.addEventListener('click',e=>{if(!nav.contains(e.target))nav.querySelectorAll('.nav-group').forEach(g=>g.removeAttribute('data-open'));else{const h=e.target.closest('.nav-heading');if(h)nav.querySelectorAll('.nav-group').forEach(g=>{if(g!==h.parentElement)g.removeAttribute('data-open')})}});document.addEventListener('keydown',e=>{if(e.key==='Escape')nav.querySelectorAll('.nav-group').forEach(g=>g.removeAttribute('data-open'))})});</script>
@@ -41,7 +41,7 @@
   sync();
 })();
 </script>
-<script type="module" src="/static/js/app.js?v=distristream-ui-20261126-5"></script>
+<script type="module" src="/static/js/app.js?v=mediafabric-ui-20261127-3"></script>
 <script>
 (() => {
   const commandLine = /^(?:[>$#]\s*)?(?:python(?:3(?:\.\d+)?)?|py(?:\s|$)|pip(?:3)?(?:\s|$)|ffmpeg(?:\s|$)|git(?:\s|$)|cd(?:\s|$)|npm(?:\s|$)|npx(?:\s|$)|uv(?:\s|$)|conda(?:\s|$)|docker(?:\s|$)|curl(?:\s|$)|wget(?:\s|$)|sudo(?:\s|$)|winget(?:\s|$)|choco(?:\s|$)|apt(?:-get)?(?:\s|$)|\.\\|&\s|setx\s|\$env:|export\s)/i;
@@ -117,7 +117,7 @@
       'py -m venv worker\\.venv',
       '.\\worker\\.venv\\Scripts\\python.exe -m pip install -r worker\\requirements.txt',
       ...workers.map(name => `${name}: .\\worker\\.venv\\Scripts\\python.exe worker\\worker.py --coordinator ${coordinator} --name ${name}`),
-      'PowerShell (Administrator, on coordinator): New-NetFirewallRule -DisplayName "DistriStream Coordinator" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 8000 -Profile Private',
+      'PowerShell (Administrator, on coordinator): New-NetFirewallRule -DisplayName "mediaFabric Coordinator" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 8000 -Profile Private',
       'Use the coordinator LAN IP; 127.0.0.1 works only on the coordinator.'
     ];
     const replacement = document.createElement('div');

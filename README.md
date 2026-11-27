@@ -1,4 +1,4 @@
-# DISTRISTREAM
+# mediaFabric
 
 A runnable prototype: upload a video, choose 1080p/720p/480p/360p, split into ~6-second source chunks, create one task per chunk × quality, distribute those tasks to independent worker laptops, transcode with FFmpeg, upload HLS segments, and generate `.m3u8` playlists. Workers heartbeat; stale processing tasks are requeued.
 
@@ -80,19 +80,13 @@ Useful APIs include:
 - `GET /api/scheduler/decisions`
 - `GET /api/jobs/{job_id}/master.m3u8`
 
-The complexity formula currently used is `0.6M + 0.4S`; saliency is not claimed or measured.
+The complexity formula currently used is `0.6M + 0.4S`; saliency is not claimed or measured. Queue size is configurable per worker (1–64 tasks) when creating a job. Scheduling normalizes queue occupancy by that job's selected capacity. Time reduction is `(serial transcode time − elapsed job time) / serial transcode time × 100`.
 
 ## Code modules
 
-The browser UI is split into focused ES modules under `app/static/js/`:
+The active browser UI is implemented in:
 
-- `app.js` - page routing, dashboard, and task distribution doughnut chart
-- `upload.js` — upload form and rendition selection
-- `jobs.js` — job progress polling
-- `player.js` — output cards and HLS playback
-- `workers.js` — worker telemetry
-- `worker_onboarding.js` — remote worker command generation
-- `scheduler.js` — scheduling mode, decisions, and job timings
-- `state.js` and `utils.js` — shared state and HTTP/HTML helpers
+- `app.js` - page routing, dashboard, job creation, and monitoring
+- `api.js` - coordinator API requests
 
 Backend analysis and scheduling logic live in `app/content_analysis.py` and `app/scheduler.py`.

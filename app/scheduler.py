@@ -47,10 +47,15 @@ def choose_worker(connection, task):
     eligible = []
 
     job = connection.execute(
-        "SELECT scheduler_mode, manual_workers FROM jobs WHERE id=?",
+        "SELECT scheduler_mode, manual_workers, queue_capacity FROM jobs WHERE id=?",
         (task["job_id"],),
     ).fetchone()
     mode = (job["scheduler_mode"] if job else None) or os.getenv("SCHEDULER_MODE", SCHEDULER_MODE)
+    queue_capacity = (
+        job["queue_capacity"]
+        if job and job["queue_capacity"] and job["queue_capacity"] > 0
+        else QUEUE_CAPACITY
+    )
     if mode == "manual":
         selected_workers = set(json.loads((job["manual_workers"] if job else None) or "[]"))
         workers = [
@@ -70,10 +75,10 @@ def choose_worker(connection, task):
         active = queue_depth(connection, worker["id"])
         capacity = (worker["cpu"] or 1) / max_cores
         load = min(1.0, (worker["cpu_usage"] or 0) / 100)
-        queue = active / QUEUE_CAPACITY
+        queue = active / queue_capacity
         network = min(1.0, (worker["network_cost"] or 0.0))
 
-        if active >= QUEUE_CAPACITY:
+        if active >= queue_capacity:
             continue
 
         if mode in ("baseline", "manual"):
@@ -94,6 +99,7 @@ def choose_worker(connection, task):
             "capacity": round(capacity, 4),
             "load": round(load, 4),
             "queue": round(queue, 4),
+            "queue_capacity": queue_capacity,
             "network": round(network, 4),
             "active": active,
         })

@@ -136,12 +136,12 @@ body{font-size:18px}
 .profile-option:disabled{opacity:.4;cursor:not-allowed;text-decoration:line-through}
 .button.danger{background:#572929;border-color:#9d4b4b;color:#ffd0c9}.button.danger:hover{background:#743131}.status.cancelled{color:var(--red);border-color:var(--red);background:color-mix(in srgb,var(--red) 10%,var(--panel))}
 .worker-setup{grid-column:1/-1;border:1px solid var(--line);background:var(--panel2);padding:20px 22px;margin-bottom:12px}
-.setup-fields{display:grid;grid-template-columns:minmax(180px,.65fr) minmax(260px,1.3fr) auto;gap:16px;align-items:end;margin-top:12px}
-.setup-fields .field{margin:0}.setup-fields input{width:100%;min-height:43px}.worker-ready-line{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--muted);margin:16px 0 10px}
+.setup-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start;margin-top:12px}
+.setup-fields .field{margin:0}.setup-fields .field:nth-child(-n+2) label{display:flex;align-items:flex-end;min-height:2.4em}.setup-fields input{width:100%;min-height:43px}.worker-ready-line{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--muted);margin:16px 0 10px}
 .instruction-panel{border:1px solid var(--line);background:var(--bg);margin-top:13px}.instruction-head{padding:11px 13px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);font:12px var(--mono)}.instruction-panel pre{margin:0;padding:16px;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--text);font:13px/1.65 var(--mono)}
 .new-job-layout .worker-setup,.new-job-layout .video-section-title{grid-column:1/-1}.new-job-layout .mode-select{grid-template-columns:repeat(3,minmax(0,1fr))}.new-job-layout .mode-option{cursor:pointer}.manual-workers{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:13px}.manual-workers>label:first-child{width:100%;font:11px var(--mono);color:var(--muted)}.check-worker{display:flex;align-items:center;gap:7px;border:1px solid var(--line);padding:8px 11px;background:var(--bg);font:12px var(--mono)}.check-worker span{color:var(--muted);font-size:10px}.check-worker input{accent-color:var(--cyan)}
 .player-actions{display:flex;gap:10px;align-items:center;padding:12px 0}.player-actions button{min-width:110px}.playback-status{font-size:13px;color:var(--muted)}.video-box:fullscreen{width:100vw;height:100vh;max-height:none;aspect-ratio:auto;background:#000}.video-box:fullscreen video{max-height:none;object-fit:contain}
-@media(max-width:900px){.setup-fields{grid-template-columns:1fr}.new-job-layout .mode-select{grid-template-columns:1fr}.new-job-layout .worker-setup{padding:16px}}
+@media(max-width:900px){.new-job-layout .mode-select{grid-template-columns:1fr}.new-job-layout .worker-setup{padding:16px}}
 :root[data-theme="coffee"] .worker-setup{background:linear-gradient(135deg,#f4e7d6,#fff9f0);border-color:#d8b996}:root[data-theme="coffee"] .instruction-panel{background:#f5ecdf;border-color:#dcc7ae}:root[data-theme="coffee"] .instruction-head{border-color:#dcc7ae;color:#5b4030}:root[data-theme="coffee"] .instruction-panel pre{color:#4d392b}
 :root[data-theme="coffee"] .button.danger{background:#8f4036;border-color:#9c5146;color:#fff4ec}:root[data-theme="coffee"] .button.danger:hover{background:#a44b40}:root[data-theme="coffee"] .status.cancelled{background:#f9e9e5;border-color:#d5988e;color:#98453b}
 .page-head h2{font-size:30px;letter-spacing:-.65px;margin:5px 0;font-weight:600}
@@ -233,6 +233,7 @@ input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{ou
 .new-job-layout .mode-option b{align-self:end;font-size:13px}
 .new-job-layout .mode-option p{align-self:start;margin-top:8px;font-size:11px}
 @media(max-width:520px){.complexity-counts{grid-template-columns:1fr}}
+@media(max-width:520px){.setup-fields .field:nth-child(3),.setup-fields #generateInstructions{grid-column:1/-1}}
 .complexity-distribution{margin-top:20px}
 .complexity-summary{display:flex;align-items:center;gap:38px;min-height:270px;padding:22px 26px}
 .complexity-pie{flex:0 0 220px;width:220px;height:220px;border-radius:50%;border:1px solid color-mix(in srgb,var(--text) 18%,transparent);box-shadow:0 8px 22px #0002}

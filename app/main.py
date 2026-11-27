@@ -62,7 +62,7 @@ def configure_ffmpeg_path():
 configure_ffmpeg_path()
 
 ST = (
-    Path("/tmp/distristream-storage")
+    Path("/tmp/mediaFabric-storage")
     if os.getenv("VERCEL")
     else BASE / "storage"
 )
@@ -86,7 +86,7 @@ for directory in (UP, CH, OUT):
 # ============================================================
 
 app = FastAPI(
-    title="DistriStream"
+    title="mediaFabric"
 )
 
 app.mount(
@@ -178,6 +178,7 @@ def init():
             ("scheduler_mode", "TEXT"),
             ("manual_workers", "TEXT"),
             ("source_metadata", "TEXT"),
+            ("queue_capacity", f"INTEGER DEFAULT {QUEUE_CAPACITY}"),
         ],
         "tasks": [
             ("complexity", "REAL"),
@@ -401,7 +402,15 @@ async def heartbeat(
 @app.get("/api/scheduler/status")
 def scheduler_status():
     connection = db()
-    mode = os.getenv("SCHEDULER_MODE", "intelligent")
+    active_job = connection.execute(
+        "SELECT scheduler_mode, queue_capacity FROM jobs "
+        "WHERE status IN ('queued', 'processing') "
+        "ORDER BY created DESC LIMIT 1"
+    ).fetchone()
+    mode = (
+        active_job["scheduler_mode"] if active_job else None
+    ) or os.getenv("SCHEDULER_MODE", "intelligent")
+    queue_capacity = active_job["queue_capacity"] if active_job else 0
     queued = connection.execute(
         "SELECT COUNT(*) FROM tasks WHERE status='queued'"
     ).fetchone()[0]
@@ -414,11 +423,17 @@ def scheduler_status():
     connection.close()
     return {
         "mode": mode,
-        "queue_capacity": QUEUE_CAPACITY,
+        "queue_capacity": queue_capacity,
         "queued_tasks": queued,
         "active_tasks": assigned,
         "decisions": decisions,
-        "formula": "0.25P + 0.30K - 0.20L - 0.15Q - 0.10N",
+        "formula": (
+            "Choose a queue size on New Job before scheduling."
+            if not queue_capacity
+            else "1 / (1 + active tasks)"
+            if mode in ("baseline", "manual")
+            else "0.25P + 0.30K - 0.20L - 0.15Q - 0.10N (Q = active / queue size)"
+        ),
     }
 
 
@@ -658,6 +673,11 @@ def job_metrics(jid: str):
     workers_used = int(task_metrics["workers_used"] or 0)
     throughput = completed_count / total_time if total_time and total_time > 0 else None
     speedup = serial_time / total_time if serial_time > 0 and total_time and total_time > 0 else None
+    time_reduction = (
+        (serial_time - total_time) / serial_time * 100
+        if serial_time > 0 and total_time is not None
+        else None
+    )
     utilization = min(100.0, serial_time / (total_time * workers_used) * 100) if total_time and total_time > 0 and workers_used else None
 
     return {
@@ -669,6 +689,7 @@ def job_metrics(jid: str):
         "throughput_tasks_per_second": round(throughput, 4) if throughput is not None else None,
         "serial_transcode_time": round(serial_time, 4),
         "speedup": round(speedup, 4) if speedup is not None else None,
+        "time_reduction_percent": round(time_reduction, 2) if time_reduction is not None else None,
         "worker_utilization_percent": round(utilization, 2) if utilization is not None else None,
         "average_queue_time": round(task_metrics["avg_queue"] or 0, 4),
         "average_download_time": round(task_metrics["avg_download"] or 0, 4),
@@ -785,8 +806,12 @@ async def upload(
     manual_workers: str = Form(""),
     source_width: int | None = Form(None),
     source_height: int | None = Form(None),
+    queue_size: int = Form(QUEUE_CAPACITY),
 ):
     upload_started = time.time()
+
+    if not 1 <= queue_size <= 64:
+        raise HTTPException(status_code=400, detail="Queue size must be between 1 and 64")
 
     scheduler_mode = scheduler_mode.lower().strip()
     if scheduler_mode not in {"baseline", "intelligent", "manual"}:
@@ -989,9 +1014,9 @@ async def upload(
             id, filename, source, duration, status, profiles,
             total, done, created, upload_time, chunking_time,
             analysis_time, started_at, scheduler_mode, manual_workers,
-            source_metadata
+            source_metadata, queue_capacity
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             job_id,
@@ -1012,6 +1037,7 @@ async def upload(
             scheduler_mode,
             json.dumps(manual_worker_names),
             json.dumps(source_metadata),
+            queue_size,
         ),
     )
 
